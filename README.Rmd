@@ -13,5 +13,69 @@ knitr::opts_chunk$set(
 
 # imoveis_quinto_andar
 
-<!-- badges: start -->
-<!-- badges: end -->
+## Carregar pacotes e dados 
+```{r}
+library(tidyverse)
+library(tidytext)
+library(gt)
+
+theme_set(
+  theme_light()
+)
+
+imoveis <- read_rds("dados/imoveis.rds")
+
+```
+
+## Função para formatar valores monetários
+
+```{r}
+escala_dinheiro <- scales::dollar_format(scale = 1e-6,
+                                         suffix = "M")
+
+```
+
+## Relação de área do imóvel com valor de venda  
+
+```{r}
+imoveis %>% 
+  filter(salePrice < 15e6) %>% 
+  ggplot(aes(area, salePrice)) +
+  geom_point(color = "brown", alpha = 0.2) +
+  scale_y_log10(labels = escala_dinheiro) +
+  scale_x_log10() +
+  geom_smooth(method = "lm", color = "tomato", fill = "tomato", alpha = 0.2) 
+```
+
+## Relação entre número de quartos e preço do imóvel  
+
+```{r}
+imoveis %>% 
+  ggplot(aes(factor(bedrooms), salePrice)) +
+  geom_boxplot() +
+  scale_y_log10(labels = escala_dinheiro)
+```
+
+## Custo por bairro em SP
+
+```{r}
+imoveis %>% 
+  summarize(
+    price = median(salePrice),
+    total_cost = mean(totalCost),
+    yield = mean(yield),
+    n = n(),
+    .by = regionName
+  ) %>% 
+  filter(n > 10) %>% 
+  arrange(desc(total_cost)) %>% 
+  head(20) %>% 
+  gt() 
+  
+```
+
+
+
+
+
+
