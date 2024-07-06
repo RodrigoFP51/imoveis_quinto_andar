@@ -22,6 +22,7 @@ headers <- c(
 
 # Request -----------------------------------------------------------------
 
+## offset: parametro mandado no body json do POST REQUEST
 offset <- c(0, seq(12, by = 11, length.out = 1000))
 data <- 
   paste0(
@@ -76,8 +77,6 @@ all_dfs <- all_dfs_raw %>%
 
 write_rds(all_dfs, "imoveis.rds")
 
-
-
 # Analysis  ---------------------------------------------------------------
 
 escala_dinheiro <- scales::dollar_format(scale = 1e-6,
@@ -114,23 +113,16 @@ all_dfs %>%
   arrange(desc(total_cost)) %>% 
   head(20)
 
-all_dfs %>% 
-  filter(str_detect(neighbourhood, "Jardim Europ")) %>% view()
-  ggplot(aes(totalCost)) + geom_histogram()
 
 all_dfs %>% 
   mutate(
     regionName = fct_lump(regionName, n = 20, other_level = "Outro"),
     regionName = fct_reorder(regionName, salePrice),
-    regionName = fct_relevel(regionName, "Outro", after = Inf)
+    regionName = fct_relevel(regionName, "Outro", after = -Inf)
   ) %>% 
   ggplot(aes(regionName, salePrice)) +
   geom_boxplot() + 
   scale_y_log10(labels = escala_dinheiro) +
   coord_flip()
-
-all_dfs %>% 
-  mutate(installations = map(installations, \(x) paste(x, sep = ",")))
-
 
 

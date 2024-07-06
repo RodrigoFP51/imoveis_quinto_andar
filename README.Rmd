@@ -14,10 +14,11 @@ knitr::opts_chunk$set(
 # imoveis_quinto_andar
 
 ## Carregar pacotes e dados 
-```{r}
-library(tidyverse)
+```{r, warning=FALSE}
+library(tidyverse, quietly = TRUE)
 library(tidytext)
 library(gt)
+library(gtExtras)
 
 theme_set(
   theme_light()
@@ -32,7 +33,6 @@ imoveis <- read_rds("dados/imoveis.rds")
 ```{r}
 escala_dinheiro <- scales::dollar_format(scale = 1e-6,
                                          suffix = "M")
-
 ```
 
 ## Relação de área do imóvel com valor de venda  
@@ -53,28 +53,82 @@ imoveis %>%
 imoveis %>% 
   ggplot(aes(factor(bedrooms), salePrice)) +
   geom_boxplot() +
-  scale_y_log10(labels = escala_dinheiro)
+  scale_y_log10(labels = escala_dinheiro) +
+  labs(x='N° de quartos', y='Valor de venda')
 ```
 
-## Custo por bairro em SP
+## Custo por região em SP
 
 ```{r}
-imoveis %>% 
+imoveis_por_regiao <- imoveis %>% 
   summarize(
-    price = median(salePrice),
-    total_cost = mean(totalCost),
+    sale_price = median(salePrice),
+    total_cost = median(totalCost),
     yield = mean(yield),
     n = n(),
     .by = regionName
   ) %>% 
-  filter(n > 10) %>% 
-  arrange(desc(total_cost)) %>% 
-  head(20) %>% 
-  gt() 
+  filter(n > 15) %>% 
+  arrange(desc(sale_price)) 
   
+imoveis_por_regiao %>% 
+  gt() %>% 
+  cols_label(
+    regionName = "Localização",
+    sale_price = "Preço do Imóvel",
+    total_cost = "Custo Total de Aluguel",
+    yield = "Aluguel / Valor Imóvel",
+    n = "Quantidade"
+  ) %>% 
+  fmt_currency(
+    columns = c(sale_price, total_cost),
+    decimals = 0,
+    currency = "BRL"
+  ) %>% 
+  fmt_percent(
+    columns = yield,
+    decimals = 2,
+    drop_trailing_zeros = TRUE
+  ) %>%
+  tab_spanner(
+    label = "Valores Medianos",
+    columns = c(sale_price, total_cost)
+  ) %>% 
+  tab_header(
+    title = "Valores de Apartamentos em diferentes regiões de SP"
+  ) %>% 
+  tab_source_note("Fonte: quintoandar.com.br") %>% 
+  gt_theme_espn() 
 ```
 
+```{r}
+library(tidytext)
+imoveis %>% 
+  unnest_tokens(palavra, installations) %>% 
+  summarize(
+    sale_price = mean(salePrice),
+    .by = palavra
+  ) %>% 
+  mutate(palavra = fct_reorder(palavra, sale_price)) %>% 
+  ggplot(aes(palavra, sale_price)) + 
+  geom_segment(aes(x=palavra, xend=palavra, y=0, yend=sale_price),
+               lty = 2) +
+  geom_point(size = 3.6) +
+  scale_y_continuous(labels = escala_dinheiro) +
+  coord_flip() +
+  labs(x='', y='')
+```
 
+```{r}
+imoveis %>% 
+  ggplot(aes(yield, salePrice)) +
+  geom_hex(bins = 50,
+           show.legend = FALSE) +
+  scale_fill_fermenter(palette = "PuBu") +
+  scale_y_continuous(labels = escala_dinheiro) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  geom_smooth(method = "loess")
+```
 
 
 

@@ -6,7 +6,7 @@
 ## Carregar pacotes e dados
 
 ``` r
-library(tidyverse)
+library(tidyverse, quietly = TRUE)
 #> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 #> ✔ dplyr     1.1.4     ✔ readr     2.1.5
 #> ✔ forcats   1.0.0     ✔ stringr   1.5.1
@@ -18,8 +18,8 @@ library(tidyverse)
 #> ✖ dplyr::lag()    masks stats::lag()
 #> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 library(tidytext)
-#> Warning: package 'tidytext' was built under R version 4.3.3
 library(gt)
+library(gtExtras)
 
 theme_set(
   theme_light()
@@ -56,42 +56,71 @@ imoveis %>%
 imoveis %>% 
   ggplot(aes(factor(bedrooms), salePrice)) +
   geom_boxplot() +
-  scale_y_log10(labels = escala_dinheiro)
+  scale_y_log10(labels = escala_dinheiro) +
+  labs(x='N° de quartos', y='Valor de venda')
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-## Custo por bairro em SP
+## Custo por região em SP
 
 ``` r
-imoveis %>% 
+imoveis_por_regiao <- imoveis %>% 
   summarize(
-    price = median(salePrice),
-    total_cost = mean(totalCost),
+    sale_price = median(salePrice),
+    total_cost = median(totalCost),
     yield = mean(yield),
     n = n(),
     .by = regionName
   ) %>% 
-  filter(n > 10) %>% 
-  arrange(desc(total_cost)) %>% 
-  head(20) %>% 
-  gt() 
+  filter(n > 15) %>% 
+  arrange(desc(sale_price)) 
+  
+imoveis_por_regiao %>% 
+  gt() %>% 
+  cols_label(
+    regionName = "Localização",
+    sale_price = "Preço do Imóvel",
+    total_cost = "Custo Total de Aluguel",
+    yield = "Aluguel / Valor Imóvel",
+    n = "Quantidade"
+  ) %>% 
+  fmt_currency(
+    columns = c(sale_price, total_cost),
+    decimals = 0,
+    currency = "BRL"
+  ) %>% 
+  fmt_percent(
+    columns = yield,
+    decimals = 2,
+    drop_trailing_zeros = TRUE
+  ) %>%
+  tab_spanner(
+    label = "Valores Medianos",
+    columns = c(sale_price, total_cost)
+  ) %>% 
+  tab_header(
+    title = "Valores de Apartamentos em diferentes regiões de SP"
+  ) %>% 
+  tab_source_note("Fonte: quintoandar.com.br") %>% 
+  gt_theme_espn() 
 ```
 
-<div id="shmdrbqass" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#shmdrbqass table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+<div id="trshmasvyn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+#trshmasvyn table {
+  font-family: Lato, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-&#10;#shmdrbqass thead, #shmdrbqass tbody, #shmdrbqass tfoot, #shmdrbqass tr, #shmdrbqass td, #shmdrbqass th {
+&#10;#trshmasvyn thead, #trshmasvyn tbody, #trshmasvyn tfoot, #trshmasvyn tr, #trshmasvyn td, #trshmasvyn th {
   border-style: none;
 }
-&#10;#shmdrbqass p {
+&#10;#trshmasvyn p {
   margin: 0;
   padding: 0;
 }
-&#10;#shmdrbqass .gt_table {
+&#10;#trshmasvyn .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -104,8 +133,8 @@ imoveis %>%
   background-color: #FFFFFF;
   width: auto;
   border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
+  border-top-width: 3px;
+  border-top-color: #FFFFFF;
   border-right-style: none;
   border-right-width: 2px;
   border-right-color: #D3D3D3;
@@ -116,13 +145,13 @@ imoveis %>%
   border-left-width: 2px;
   border-left-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_caption {
+&#10;#trshmasvyn .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-&#10;#shmdrbqass .gt_title {
+&#10;#trshmasvyn .gt_title {
   color: #333333;
-  font-size: 125%;
+  font-size: 24px;
   font-weight: initial;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -131,7 +160,7 @@ imoveis %>%
   border-bottom-color: #FFFFFF;
   border-bottom-width: 0;
 }
-&#10;#shmdrbqass .gt_subtitle {
+&#10;#trshmasvyn .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -142,9 +171,9 @@ imoveis %>%
   border-top-color: #FFFFFF;
   border-top-width: 0;
 }
-&#10;#shmdrbqass .gt_heading {
+&#10;#trshmasvyn .gt_heading {
   background-color: #FFFFFF;
-  text-align: center;
+  text-align: left;
   border-bottom-color: #FFFFFF;
   border-left-style: none;
   border-left-width: 1px;
@@ -153,12 +182,12 @@ imoveis %>%
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_bottom_border {
+&#10;#trshmasvyn .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_col_headings {
+&#10;#trshmasvyn .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -172,12 +201,12 @@ imoveis %>%
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_col_heading {
+&#10;#trshmasvyn .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
+  font-size: 80%;
+  font-weight: bolder;
+  text-transform: uppercase;
   border-left-style: none;
   border-left-width: 1px;
   border-left-color: #D3D3D3;
@@ -191,24 +220,24 @@ imoveis %>%
   padding-right: 5px;
   overflow-x: hidden;
 }
-&#10;#shmdrbqass .gt_column_spanner_outer {
+&#10;#trshmasvyn .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
+  font-size: 80%;
+  font-weight: bolder;
+  text-transform: uppercase;
   padding-top: 0;
   padding-bottom: 0;
   padding-left: 4px;
   padding-right: 4px;
 }
-&#10;#shmdrbqass .gt_column_spanner_outer:first-child {
+&#10;#trshmasvyn .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
-&#10;#shmdrbqass .gt_column_spanner_outer:last-child {
+&#10;#trshmasvyn .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
-&#10;#shmdrbqass .gt_column_spanner {
+&#10;#trshmasvyn .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -219,19 +248,19 @@ imoveis %>%
   display: inline-block;
   width: 100%;
 }
-&#10;#shmdrbqass .gt_spanner_row {
+&#10;#trshmasvyn .gt_spanner_row {
   border-bottom-style: hidden;
 }
-&#10;#shmdrbqass .gt_group_heading {
+&#10;#trshmasvyn .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
   padding-right: 5px;
   color: #333333;
   background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
+  font-size: 80%;
+  font-weight: bolder;
+  text-transform: uppercase;
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -247,12 +276,12 @@ imoveis %>%
   vertical-align: middle;
   text-align: left;
 }
-&#10;#shmdrbqass .gt_empty_group_heading {
+&#10;#trshmasvyn .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
+  font-size: 80%;
+  font-weight: bolder;
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -261,21 +290,21 @@ imoveis %>%
   border-bottom-color: #D3D3D3;
   vertical-align: middle;
 }
-&#10;#shmdrbqass .gt_from_md > :first-child {
+&#10;#trshmasvyn .gt_from_md > :first-child {
   margin-top: 0;
 }
-&#10;#shmdrbqass .gt_from_md > :last-child {
+&#10;#trshmasvyn .gt_from_md > :last-child {
   margin-bottom: 0;
 }
-&#10;#shmdrbqass .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
+&#10;#trshmasvyn .gt_row {
+  padding-top: 7px;
+  padding-bottom: 7px;
   padding-left: 5px;
   padding-right: 5px;
   margin: 10px;
   border-top-style: solid;
   border-top-width: 1px;
-  border-top-color: #D3D3D3;
+  border-top-color: #F6F7F7;
   border-left-style: none;
   border-left-width: 1px;
   border-left-color: #D3D3D3;
@@ -285,19 +314,19 @@ imoveis %>%
   vertical-align: middle;
   overflow-x: hidden;
 }
-&#10;#shmdrbqass .gt_stub {
+&#10;#trshmasvyn .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
+  font-size: 80%;
+  font-weight: bolder;
+  text-transform: uppercase;
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #D3D3D3;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#shmdrbqass .gt_stub_row_group {
+&#10;#trshmasvyn .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -310,13 +339,13 @@ imoveis %>%
   padding-right: 5px;
   vertical-align: top;
 }
-&#10;#shmdrbqass .gt_row_group_first td {
+&#10;#trshmasvyn .gt_row_group_first td {
   border-top-width: 2px;
 }
-&#10;#shmdrbqass .gt_row_group_first th {
+&#10;#trshmasvyn .gt_row_group_first th {
   border-top-width: 2px;
 }
-&#10;#shmdrbqass .gt_summary_row {
+&#10;#trshmasvyn .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -325,14 +354,14 @@ imoveis %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#shmdrbqass .gt_first_summary_row {
+&#10;#trshmasvyn .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_first_summary_row.thick {
+&#10;#trshmasvyn .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
-&#10;#shmdrbqass .gt_last_summary_row {
+&#10;#trshmasvyn .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -341,7 +370,7 @@ imoveis %>%
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_grand_summary_row {
+&#10;#trshmasvyn .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -350,7 +379,7 @@ imoveis %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#shmdrbqass .gt_first_grand_summary_row {
+&#10;#trshmasvyn .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -359,7 +388,7 @@ imoveis %>%
   border-top-width: 6px;
   border-top-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_last_grand_summary_row_top {
+&#10;#trshmasvyn .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -368,10 +397,10 @@ imoveis %>%
   border-bottom-width: 6px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
+&#10;#trshmasvyn .gt_striped {
+  background-color: #FAFAFA;
 }
-&#10;#shmdrbqass .gt_table_body {
+&#10;#trshmasvyn .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -379,7 +408,7 @@ imoveis %>%
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_footnotes {
+&#10;#trshmasvyn .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -392,7 +421,7 @@ imoveis %>%
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_footnote {
+&#10;#trshmasvyn .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -400,7 +429,7 @@ imoveis %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#shmdrbqass .gt_sourcenotes {
+&#10;#trshmasvyn .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -413,172 +442,373 @@ imoveis %>%
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#shmdrbqass .gt_sourcenote {
-  font-size: 90%;
+&#10;#trshmasvyn .gt_sourcenote {
+  font-size: 12px;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#shmdrbqass .gt_left {
+&#10;#trshmasvyn .gt_left {
   text-align: left;
 }
-&#10;#shmdrbqass .gt_center {
+&#10;#trshmasvyn .gt_center {
   text-align: center;
 }
-&#10;#shmdrbqass .gt_right {
+&#10;#trshmasvyn .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-&#10;#shmdrbqass .gt_font_normal {
+&#10;#trshmasvyn .gt_font_normal {
   font-weight: normal;
 }
-&#10;#shmdrbqass .gt_font_bold {
+&#10;#trshmasvyn .gt_font_bold {
   font-weight: bold;
 }
-&#10;#shmdrbqass .gt_font_italic {
+&#10;#trshmasvyn .gt_font_italic {
   font-style: italic;
 }
-&#10;#shmdrbqass .gt_super {
+&#10;#trshmasvyn .gt_super {
   font-size: 65%;
 }
-&#10;#shmdrbqass .gt_footnote_marks {
+&#10;#trshmasvyn .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
-&#10;#shmdrbqass .gt_asterisk {
+&#10;#trshmasvyn .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
-&#10;#shmdrbqass .gt_indent_1 {
+&#10;#trshmasvyn .gt_indent_1 {
   text-indent: 5px;
 }
-&#10;#shmdrbqass .gt_indent_2 {
+&#10;#trshmasvyn .gt_indent_2 {
   text-indent: 10px;
 }
-&#10;#shmdrbqass .gt_indent_3 {
+&#10;#trshmasvyn .gt_indent_3 {
   text-indent: 15px;
 }
-&#10;#shmdrbqass .gt_indent_4 {
+&#10;#trshmasvyn .gt_indent_4 {
   text-indent: 20px;
 }
-&#10;#shmdrbqass .gt_indent_5 {
+&#10;#trshmasvyn .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
   <thead>
-    &#10;    <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="regionName">regionName</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="price">price</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="total_cost">total_cost</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="yield">yield</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="n">n</th>
+    <tr class="gt_heading">
+      <td colspan="5" class="gt_heading gt_title gt_font_normal gt_bottom_border" style>Valores de Apartamentos em diferentes regiões de SP</td>
+    </tr>
+    &#10;    <tr class="gt_col_headings gt_spanner_row">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1" scope="col" id="Localização">Localização</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Valores Medianos">
+        <span class="gt_column_spanner">Valores Medianos</span>
+      </th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="Aluguel / Valor Imóvel">Aluguel / Valor Imóvel</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="Quantidade">Quantidade</th>
+    </tr>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Preço do Imóvel">Preço do Imóvel</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Custo Total de Aluguel">Custo Total de Aluguel</th>
     </tr>
   </thead>
   <tbody class="gt_table_body">
     <tr><td headers="regionName" class="gt_row gt_left">Vila Nova Conceição</td>
-<td headers="price" class="gt_row gt_right">2345000</td>
-<td headers="total_cost" class="gt_row gt_right">6286.000</td>
-<td headers="yield" class="gt_row gt_right">0.003250000</td>
+<td headers="sale_price" class="gt_row gt_right">R$2,345,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$4,204</td>
+<td headers="yield" class="gt_row gt_right">0.32%</td>
 <td headers="n" class="gt_row gt_right">18</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Itaim Bibi</td>
-<td headers="price" class="gt_row gt_right">1320000</td>
-<td headers="total_cost" class="gt_row gt_right">4935.536</td>
-<td headers="yield" class="gt_row gt_right">0.003928571</td>
-<td headers="n" class="gt_row gt_right">56</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Jardim Paulista</td>
-<td headers="price" class="gt_row gt_right">1155000</td>
-<td headers="total_cost" class="gt_row gt_right">4682.315</td>
-<td headers="yield" class="gt_row gt_right">0.003822308</td>
-<td headers="n" class="gt_row gt_right">130</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Moema</td>
-<td headers="price" class="gt_row gt_right">1050000</td>
-<td headers="total_cost" class="gt_row gt_right">4629.491</td>
-<td headers="yield" class="gt_row gt_right">0.004243636</td>
-<td headers="n" class="gt_row gt_right">110</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Paraíso</td>
-<td headers="price" class="gt_row gt_right">1017500</td>
-<td headers="total_cost" class="gt_row gt_right">4517.483</td>
-<td headers="yield" class="gt_row gt_right">0.003848276</td>
-<td headers="n" class="gt_row gt_right">58</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Campo Belo</td>
-<td headers="price" class="gt_row gt_right">1150000</td>
-<td headers="total_cost" class="gt_row gt_right">4439.314</td>
-<td headers="yield" class="gt_row gt_right">0.004168627</td>
-<td headers="n" class="gt_row gt_right">51</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Vila Olímpia</td>
-<td headers="price" class="gt_row gt_right">1162500</td>
-<td headers="total_cost" class="gt_row gt_right">4176.081</td>
-<td headers="yield" class="gt_row gt_right">0.004228378</td>
-<td headers="n" class="gt_row gt_right">74</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Vila Madalena</td>
-<td headers="price" class="gt_row gt_right">1050000</td>
-<td headers="total_cost" class="gt_row gt_right">4158.491</td>
-<td headers="yield" class="gt_row gt_right">0.004073585</td>
-<td headers="n" class="gt_row gt_right">53</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Itaim Bibi</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,320,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$4,414</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.39%</td>
+<td headers="n" class="gt_row gt_right gt_striped">56</td></tr>
     <tr><td headers="regionName" class="gt_row gt_left">Brooklin</td>
-<td headers="price" class="gt_row gt_right">1229000</td>
-<td headers="total_cost" class="gt_row gt_right">4103.857</td>
-<td headers="yield" class="gt_row gt_right">0.004433835</td>
+<td headers="sale_price" class="gt_row gt_right">R$1,229,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,300</td>
+<td headers="yield" class="gt_row gt_right">0.44%</td>
 <td headers="n" class="gt_row gt_right">133</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Chácara Santo Antonio</td>
-<td headers="price" class="gt_row gt_right">1050000</td>
-<td headers="total_cost" class="gt_row gt_right">3965.467</td>
-<td headers="yield" class="gt_row gt_right">0.004453333</td>
-<td headers="n" class="gt_row gt_right">15</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Vila Olímpia</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,162,500</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,704</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.42%</td>
+<td headers="n" class="gt_row gt_right gt_striped">74</td></tr>
     <tr><td headers="regionName" class="gt_row gt_left">Pinheiros</td>
-<td headers="price" class="gt_row gt_right">1160000</td>
-<td headers="total_cost" class="gt_row gt_right">3900.786</td>
-<td headers="yield" class="gt_row gt_right">0.004184615</td>
+<td headers="sale_price" class="gt_row gt_right">R$1,160,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,290</td>
+<td headers="yield" class="gt_row gt_right">0.42%</td>
 <td headers="n" class="gt_row gt_right">182</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Higienópolis</td>
-<td headers="price" class="gt_row gt_right">1100000</td>
-<td headers="total_cost" class="gt_row gt_right">3505.378</td>
-<td headers="yield" class="gt_row gt_right">0.003562162</td>
-<td headers="n" class="gt_row gt_right">37</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Vila Clementino</td>
-<td headers="price" class="gt_row gt_right">567500</td>
-<td headers="total_cost" class="gt_row gt_right">3190.667</td>
-<td headers="yield" class="gt_row gt_right">0.004687037</td>
-<td headers="n" class="gt_row gt_right">54</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Perdizes</td>
-<td headers="price" class="gt_row gt_right">1000000</td>
-<td headers="total_cost" class="gt_row gt_right">3171.959</td>
-<td headers="yield" class="gt_row gt_right">0.003783505</td>
-<td headers="n" class="gt_row gt_right">97</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Jardim Anália Franco</td>
-<td headers="price" class="gt_row gt_right">750000</td>
-<td headers="total_cost" class="gt_row gt_right">3140.717</td>
-<td headers="yield" class="gt_row gt_right">0.004519565</td>
-<td headers="n" class="gt_row gt_right">46</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Chácara Inglesa</td>
-<td headers="price" class="gt_row gt_right">731500</td>
-<td headers="total_cost" class="gt_row gt_right">3096.750</td>
-<td headers="yield" class="gt_row gt_right">0.004616304</td>
-<td headers="n" class="gt_row gt_right">92</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Vila Pompéia</td>
-<td headers="price" class="gt_row gt_right">901000</td>
-<td headers="total_cost" class="gt_row gt_right">2993.895</td>
-<td headers="yield" class="gt_row gt_right">0.004311579</td>
-<td headers="n" class="gt_row gt_right">95</td></tr>
-    <tr><td headers="regionName" class="gt_row gt_left">Vila Mariana</td>
-<td headers="price" class="gt_row gt_right">694500</td>
-<td headers="total_cost" class="gt_row gt_right">2949.693</td>
-<td headers="yield" class="gt_row gt_right">0.004618978</td>
-<td headers="n" class="gt_row gt_right">274</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Jardim Paulista</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,155,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$3,554</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.38%</td>
+<td headers="n" class="gt_row gt_right gt_striped">130</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Campo Belo</td>
+<td headers="sale_price" class="gt_row gt_right">R$1,150,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$3,314</td>
+<td headers="yield" class="gt_row gt_right">0.42%</td>
+<td headers="n" class="gt_row gt_right">51</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Higienópolis</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,100,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,495</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.36%</td>
+<td headers="n" class="gt_row gt_right gt_striped">37</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Moema</td>
+<td headers="sale_price" class="gt_row gt_right">R$1,050,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$3,070</td>
+<td headers="yield" class="gt_row gt_right">0.42%</td>
+<td headers="n" class="gt_row gt_right">110</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Vila Madalena</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,050,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$3,395</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.41%</td>
+<td headers="n" class="gt_row gt_right gt_striped">53</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Paraíso</td>
+<td headers="sale_price" class="gt_row gt_right">R$1,017,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$3,968</td>
+<td headers="yield" class="gt_row gt_right">0.38%</td>
+<td headers="n" class="gt_row gt_right">58</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Perdizes</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$1,000,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,500</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.38%</td>
+<td headers="n" class="gt_row gt_right gt_striped">97</td></tr>
     <tr><td headers="regionName" class="gt_row gt_left">Sumaré</td>
-<td headers="price" class="gt_row gt_right">928500</td>
-<td headers="total_cost" class="gt_row gt_right">2820.886</td>
-<td headers="yield" class="gt_row gt_right">0.004254545</td>
+<td headers="sale_price" class="gt_row gt_right">R$928,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,324</td>
+<td headers="yield" class="gt_row gt_right">0.43%</td>
 <td headers="n" class="gt_row gt_right">44</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Vila Pompéia</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$901,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,725</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.43%</td>
+<td headers="n" class="gt_row gt_right gt_striped">95</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Romana</td>
+<td headers="sale_price" class="gt_row gt_right">R$785,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,759</td>
+<td headers="yield" class="gt_row gt_right">0.44%</td>
+<td headers="n" class="gt_row gt_right">23</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Jardim Anália Franco</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$750,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,146</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.45%</td>
+<td headers="n" class="gt_row gt_right gt_striped">46</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Chácara Inglesa</td>
+<td headers="sale_price" class="gt_row gt_right">R$731,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,620</td>
+<td headers="yield" class="gt_row gt_right">0.46%</td>
+<td headers="n" class="gt_row gt_right">92</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Saúde</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$710,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,346</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.42%</td>
+<td headers="n" class="gt_row gt_right gt_striped">70</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Mariana</td>
+<td headers="sale_price" class="gt_row gt_right">R$694,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,880</td>
+<td headers="yield" class="gt_row gt_right">0.46%</td>
+<td headers="n" class="gt_row gt_right">274</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Tatuapé</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$651,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,246</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.46%</td>
+<td headers="n" class="gt_row gt_right gt_striped">170</td></tr>
     <tr><td headers="regionName" class="gt_row gt_left">Barra Funda</td>
-<td headers="price" class="gt_row gt_right">630000</td>
-<td headers="total_cost" class="gt_row gt_right">2752.235</td>
-<td headers="yield" class="gt_row gt_right">0.004803913</td>
+<td headers="sale_price" class="gt_row gt_right">R$630,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,100</td>
+<td headers="yield" class="gt_row gt_right">0.48%</td>
 <td headers="n" class="gt_row gt_right">230</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Ipiranga</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$589,500</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,398</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.47%</td>
+<td headers="n" class="gt_row gt_right gt_striped">218</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Santa Clara</td>
+<td headers="sale_price" class="gt_row gt_right">R$580,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$835</td>
+<td headers="yield" class="gt_row gt_right">0.46%</td>
+<td headers="n" class="gt_row gt_right">16</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Vila Maria </td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$580,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$746</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.43%</td>
+<td headers="n" class="gt_row gt_right gt_striped">22</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Bosque da Saúde</td>
+<td headers="sale_price" class="gt_row gt_right">R$575,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,812</td>
+<td headers="yield" class="gt_row gt_right">0.48%</td>
+<td headers="n" class="gt_row gt_right">154</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Aclimação</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$570,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,838</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.46%</td>
+<td headers="n" class="gt_row gt_right gt_striped">159</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Clementino</td>
+<td headers="sale_price" class="gt_row gt_right">R$567,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,912</td>
+<td headers="yield" class="gt_row gt_right">0.47%</td>
+<td headers="n" class="gt_row gt_right">54</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Santa Cecília</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$499,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,100</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.46%</td>
+<td headers="n" class="gt_row gt_right gt_striped">347</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Santana</td>
+<td headers="sale_price" class="gt_row gt_right">R$490,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,433</td>
+<td headers="yield" class="gt_row gt_right">0.46%</td>
+<td headers="n" class="gt_row gt_right">247</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Consolação</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$485,500</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,064</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.48%</td>
+<td headers="n" class="gt_row gt_right gt_striped">310</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Mandaqui</td>
+<td headers="sale_price" class="gt_row gt_right">R$480,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,477</td>
+<td headers="yield" class="gt_row gt_right">0.44%</td>
+<td headers="n" class="gt_row gt_right">31</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Mooca</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$470,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,557</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.5%</td>
+<td headers="n" class="gt_row gt_right gt_striped">762</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Bela Vista</td>
+<td headers="sale_price" class="gt_row gt_right">R$450,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$2,540</td>
+<td headers="yield" class="gt_row gt_right">0.49%</td>
+<td headers="n" class="gt_row gt_right">400</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Casa Verde</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$450,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,560</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.49%</td>
+<td headers="n" class="gt_row gt_right gt_striped">116</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Guilherme</td>
+<td headers="sale_price" class="gt_row gt_right">R$450,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,206</td>
+<td headers="yield" class="gt_row gt_right">0.49%</td>
+<td headers="n" class="gt_row gt_right">122</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Água Fria</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$438,170</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,157</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.49%</td>
+<td headers="n" class="gt_row gt_right gt_striped">68</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Prudente</td>
+<td headers="sale_price" class="gt_row gt_right">R$425,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,436</td>
+<td headers="yield" class="gt_row gt_right">0.49%</td>
+<td headers="n" class="gt_row gt_right">146</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Belém</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$424,500</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,628</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.5%</td>
+<td headers="n" class="gt_row gt_right gt_striped">208</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Bom Retiro</td>
+<td headers="sale_price" class="gt_row gt_right">R$400,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,955</td>
+<td headers="yield" class="gt_row gt_right">0.53%</td>
+<td headers="n" class="gt_row gt_right">139</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Água Branca</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$390,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,312</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.52%</td>
+<td headers="n" class="gt_row gt_right gt_striped">93</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Cambuci</td>
+<td headers="sale_price" class="gt_row gt_right">R$379,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,857</td>
+<td headers="yield" class="gt_row gt_right">0.51%</td>
+<td headers="n" class="gt_row gt_right">350</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Campos Elíseos</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$360,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,754</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.47%</td>
+<td headers="n" class="gt_row gt_right gt_striped">92</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Freguesia do Ó</td>
+<td headers="sale_price" class="gt_row gt_right">R$360,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,207</td>
+<td headers="yield" class="gt_row gt_right">0.48%</td>
+<td headers="n" class="gt_row gt_right">34</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Vila das Mercês</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$352,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$818</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.53%</td>
+<td headers="n" class="gt_row gt_right gt_striped">69</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Vila Roque</td>
+<td headers="sale_price" class="gt_row gt_right">R$327,500</td>
+<td headers="total_cost" class="gt_row gt_right">R$645</td>
+<td headers="yield" class="gt_row gt_right">0.48%</td>
+<td headers="n" class="gt_row gt_right">18</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Canindé</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$325,500</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$2,076</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.52%</td>
+<td headers="n" class="gt_row gt_right gt_striped">24</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Liberdade</td>
+<td headers="sale_price" class="gt_row gt_right">R$320,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,800</td>
+<td headers="yield" class="gt_row gt_right">0.52%</td>
+<td headers="n" class="gt_row gt_right">410</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Brás</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$315,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,825</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.52%</td>
+<td headers="n" class="gt_row gt_right gt_striped">115</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Parque Novo Mundo </td>
+<td headers="sale_price" class="gt_row gt_right">R$310,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$1,904</td>
+<td headers="yield" class="gt_row gt_right">0.5%</td>
+<td headers="n" class="gt_row gt_right">30</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left gt_striped">Centro</td>
+<td headers="sale_price" class="gt_row gt_right gt_striped">R$300,000</td>
+<td headers="total_cost" class="gt_row gt_right gt_striped">R$1,568</td>
+<td headers="yield" class="gt_row gt_right gt_striped">0.49%</td>
+<td headers="n" class="gt_row gt_right gt_striped">212</td></tr>
+    <tr><td headers="regionName" class="gt_row gt_left">Sacomã</td>
+<td headers="sale_price" class="gt_row gt_right">R$293,000</td>
+<td headers="total_cost" class="gt_row gt_right">R$800</td>
+<td headers="yield" class="gt_row gt_right">0.52%</td>
+<td headers="n" class="gt_row gt_right">36</td></tr>
   </tbody>
-  &#10;  
-</table>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="5">Fonte: quintoandar.com.br</td>
+    </tr>
+  </tfoot>
+  &#10;</table>
 </div>
+
+``` r
+library(tidytext)
+imoveis %>% 
+  unnest_tokens(palavra, installations) %>% 
+  summarize(
+    sale_price = mean(salePrice),
+    .by = palavra
+  ) %>% 
+  mutate(palavra = fct_reorder(palavra, sale_price)) %>% 
+  ggplot(aes(palavra, sale_price)) + 
+  geom_segment(aes(x=palavra, xend=palavra, y=0, yend=sale_price),
+               lty = 2) +
+  geom_point(size = 3.6) +
+  scale_y_continuous(labels = escala_dinheiro) +
+  coord_flip() +
+  labs(x='', y='')
+```
+
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+``` r
+imoveis %>% 
+  ggplot(aes(yield, salePrice)) +
+  geom_hex(bins = 50,
+           show.legend = FALSE) +
+  scale_fill_fermenter(palette = "PuBu") +
+  scale_y_continuous(labels = escala_dinheiro) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  geom_smooth(method = "loess")
+#> `geom_smooth()` using formula = 'y ~ x'
+```
+
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
