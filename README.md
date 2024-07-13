@@ -54,10 +54,16 @@ imoveis %>%
 
 ``` r
 imoveis %>% 
-  ggplot(aes(factor(bedrooms), salePrice)) +
-  geom_boxplot() +
+  ggplot(aes(factor(bedrooms), salePrice, fill = factor(bedrooms))) +
+  geom_violin(width = 1.4, show.legend = FALSE) +
+  geom_boxplot(width = 0.15,
+               alpha = 0.2,
+               color = "white",
+               show.legend = FALSE) +
   scale_y_log10(labels = escala_dinheiro) +
-  labs(x='N° de quartos', y='Valor de venda')
+  paletteer::scale_fill_paletteer_d("ggthemr::grape") +
+  labs(x='N° de quartos', y='Valor de venda') 
+#> Warning: `position_dodge()` requires non-overlapping x intervals
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
@@ -77,12 +83,12 @@ imoveis_por_regiao <- imoveis %>%
   arrange(desc(sale_price)) 
   
 imoveis_por_regiao %>% 
-  gt() %>% 
+  gt(process_md = TRUE) %>% 
   cols_label(
     regionName = "Localização",
     sale_price = "Preço do Imóvel",
     total_cost = "Custo Total de Aluguel",
-    yield = "Aluguel / Valor Imóvel",
+    yield = "Rendimento do Imóvel",
     n = "Quantidade"
   ) %>% 
   fmt_currency(
@@ -106,21 +112,21 @@ imoveis_por_regiao %>%
   gt_theme_espn() 
 ```
 
-<div id="trshmasvyn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="grtazsfczp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-#trshmasvyn table {
+#grtazsfczp table {
   font-family: Lato, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-&#10;#trshmasvyn thead, #trshmasvyn tbody, #trshmasvyn tfoot, #trshmasvyn tr, #trshmasvyn td, #trshmasvyn th {
+&#10;#grtazsfczp thead, #grtazsfczp tbody, #grtazsfczp tfoot, #grtazsfczp tr, #grtazsfczp td, #grtazsfczp th {
   border-style: none;
 }
-&#10;#trshmasvyn p {
+&#10;#grtazsfczp p {
   margin: 0;
   padding: 0;
 }
-&#10;#trshmasvyn .gt_table {
+&#10;#grtazsfczp .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -145,11 +151,11 @@ imoveis_por_regiao %>%
   border-left-width: 2px;
   border-left-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_caption {
+&#10;#grtazsfczp .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-&#10;#trshmasvyn .gt_title {
+&#10;#grtazsfczp .gt_title {
   color: #333333;
   font-size: 24px;
   font-weight: initial;
@@ -160,7 +166,7 @@ imoveis_por_regiao %>%
   border-bottom-color: #FFFFFF;
   border-bottom-width: 0;
 }
-&#10;#trshmasvyn .gt_subtitle {
+&#10;#grtazsfczp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -171,7 +177,7 @@ imoveis_por_regiao %>%
   border-top-color: #FFFFFF;
   border-top-width: 0;
 }
-&#10;#trshmasvyn .gt_heading {
+&#10;#grtazsfczp .gt_heading {
   background-color: #FFFFFF;
   text-align: left;
   border-bottom-color: #FFFFFF;
@@ -182,12 +188,12 @@ imoveis_por_regiao %>%
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_bottom_border {
+&#10;#grtazsfczp .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_col_headings {
+&#10;#grtazsfczp .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -201,7 +207,7 @@ imoveis_por_regiao %>%
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_col_heading {
+&#10;#grtazsfczp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 80%;
@@ -220,7 +226,7 @@ imoveis_por_regiao %>%
   padding-right: 5px;
   overflow-x: hidden;
 }
-&#10;#trshmasvyn .gt_column_spanner_outer {
+&#10;#grtazsfczp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 80%;
@@ -231,13 +237,13 @@ imoveis_por_regiao %>%
   padding-left: 4px;
   padding-right: 4px;
 }
-&#10;#trshmasvyn .gt_column_spanner_outer:first-child {
+&#10;#grtazsfczp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
-&#10;#trshmasvyn .gt_column_spanner_outer:last-child {
+&#10;#grtazsfczp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
-&#10;#trshmasvyn .gt_column_spanner {
+&#10;#grtazsfczp .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -248,10 +254,10 @@ imoveis_por_regiao %>%
   display: inline-block;
   width: 100%;
 }
-&#10;#trshmasvyn .gt_spanner_row {
+&#10;#grtazsfczp .gt_spanner_row {
   border-bottom-style: hidden;
 }
-&#10;#trshmasvyn .gt_group_heading {
+&#10;#grtazsfczp .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -276,7 +282,7 @@ imoveis_por_regiao %>%
   vertical-align: middle;
   text-align: left;
 }
-&#10;#trshmasvyn .gt_empty_group_heading {
+&#10;#grtazsfczp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -290,13 +296,13 @@ imoveis_por_regiao %>%
   border-bottom-color: #D3D3D3;
   vertical-align: middle;
 }
-&#10;#trshmasvyn .gt_from_md > :first-child {
+&#10;#grtazsfczp .gt_from_md > :first-child {
   margin-top: 0;
 }
-&#10;#trshmasvyn .gt_from_md > :last-child {
+&#10;#grtazsfczp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
-&#10;#trshmasvyn .gt_row {
+&#10;#grtazsfczp .gt_row {
   padding-top: 7px;
   padding-bottom: 7px;
   padding-left: 5px;
@@ -314,7 +320,7 @@ imoveis_por_regiao %>%
   vertical-align: middle;
   overflow-x: hidden;
 }
-&#10;#trshmasvyn .gt_stub {
+&#10;#grtazsfczp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 80%;
@@ -326,7 +332,7 @@ imoveis_por_regiao %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#trshmasvyn .gt_stub_row_group {
+&#10;#grtazsfczp .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -339,13 +345,13 @@ imoveis_por_regiao %>%
   padding-right: 5px;
   vertical-align: top;
 }
-&#10;#trshmasvyn .gt_row_group_first td {
+&#10;#grtazsfczp .gt_row_group_first td {
   border-top-width: 2px;
 }
-&#10;#trshmasvyn .gt_row_group_first th {
+&#10;#grtazsfczp .gt_row_group_first th {
   border-top-width: 2px;
 }
-&#10;#trshmasvyn .gt_summary_row {
+&#10;#grtazsfczp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -354,14 +360,14 @@ imoveis_por_regiao %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#trshmasvyn .gt_first_summary_row {
+&#10;#grtazsfczp .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_first_summary_row.thick {
+&#10;#grtazsfczp .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
-&#10;#trshmasvyn .gt_last_summary_row {
+&#10;#grtazsfczp .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -370,7 +376,7 @@ imoveis_por_regiao %>%
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_grand_summary_row {
+&#10;#grtazsfczp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -379,7 +385,7 @@ imoveis_por_regiao %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#trshmasvyn .gt_first_grand_summary_row {
+&#10;#grtazsfczp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -388,7 +394,7 @@ imoveis_por_regiao %>%
   border-top-width: 6px;
   border-top-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_last_grand_summary_row_top {
+&#10;#grtazsfczp .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -397,10 +403,10 @@ imoveis_por_regiao %>%
   border-bottom-width: 6px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_striped {
+&#10;#grtazsfczp .gt_striped {
   background-color: #FAFAFA;
 }
-&#10;#trshmasvyn .gt_table_body {
+&#10;#grtazsfczp .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -408,7 +414,7 @@ imoveis_por_regiao %>%
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_footnotes {
+&#10;#grtazsfczp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -421,7 +427,7 @@ imoveis_por_regiao %>%
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_footnote {
+&#10;#grtazsfczp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -429,7 +435,7 @@ imoveis_por_regiao %>%
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#trshmasvyn .gt_sourcenotes {
+&#10;#grtazsfczp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -442,57 +448,57 @@ imoveis_por_regiao %>%
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#trshmasvyn .gt_sourcenote {
+&#10;#grtazsfczp .gt_sourcenote {
   font-size: 12px;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#trshmasvyn .gt_left {
+&#10;#grtazsfczp .gt_left {
   text-align: left;
 }
-&#10;#trshmasvyn .gt_center {
+&#10;#grtazsfczp .gt_center {
   text-align: center;
 }
-&#10;#trshmasvyn .gt_right {
+&#10;#grtazsfczp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-&#10;#trshmasvyn .gt_font_normal {
+&#10;#grtazsfczp .gt_font_normal {
   font-weight: normal;
 }
-&#10;#trshmasvyn .gt_font_bold {
+&#10;#grtazsfczp .gt_font_bold {
   font-weight: bold;
 }
-&#10;#trshmasvyn .gt_font_italic {
+&#10;#grtazsfczp .gt_font_italic {
   font-style: italic;
 }
-&#10;#trshmasvyn .gt_super {
+&#10;#grtazsfczp .gt_super {
   font-size: 65%;
 }
-&#10;#trshmasvyn .gt_footnote_marks {
+&#10;#grtazsfczp .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
-&#10;#trshmasvyn .gt_asterisk {
+&#10;#grtazsfczp .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
-&#10;#trshmasvyn .gt_indent_1 {
+&#10;#grtazsfczp .gt_indent_1 {
   text-indent: 5px;
 }
-&#10;#trshmasvyn .gt_indent_2 {
+&#10;#grtazsfczp .gt_indent_2 {
   text-indent: 10px;
 }
-&#10;#trshmasvyn .gt_indent_3 {
+&#10;#grtazsfczp .gt_indent_3 {
   text-indent: 15px;
 }
-&#10;#trshmasvyn .gt_indent_4 {
+&#10;#grtazsfczp .gt_indent_4 {
   text-indent: 20px;
 }
-&#10;#trshmasvyn .gt_indent_5 {
+&#10;#grtazsfczp .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -506,7 +512,7 @@ imoveis_por_regiao %>%
       <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2" scope="colgroup" id="Valores Medianos">
         <span class="gt_column_spanner">Valores Medianos</span>
       </th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="Aluguel / Valor Imóvel">Aluguel / Valor Imóvel</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="Rendimento do Imóvel">Rendimento do Imóvel</th>
       <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="2" colspan="1" scope="col" id="Quantidade">Quantidade</th>
     </tr>
     <tr class="gt_col_headings">
@@ -779,6 +785,8 @@ imoveis_por_regiao %>%
   &#10;</table>
 </div>
 
+## Preço médio por unidade de instalação no predio
+
 ``` r
 library(tidytext)
 imoveis %>% 
@@ -797,17 +805,16 @@ imoveis %>%
   labs(x='', y='')
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> \## Preço de
+venda do imóvel X Rendimento do Aluguel
 
 ``` r
 imoveis %>% 
   ggplot(aes(yield, salePrice)) +
-  geom_hex(bins = 50,
-           show.legend = FALSE) +
-  scale_fill_fermenter(palette = "PuBu") +
+  geom_point(size = 2.2, alpha = 0.3, color = "#824D74") +
   scale_y_continuous(labels = escala_dinheiro) +
   scale_x_continuous(labels = scales::percent_format()) +
-  geom_smooth(method = "loess")
+  geom_smooth(method = "loess", color = "#401F71")
 #> `geom_smooth()` using formula = 'y ~ x'
 ```
 

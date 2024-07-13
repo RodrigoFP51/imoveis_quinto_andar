@@ -51,10 +51,16 @@ imoveis %>%
 
 ```{r}
 imoveis %>% 
-  ggplot(aes(factor(bedrooms), salePrice)) +
-  geom_boxplot() +
+  ggplot(aes(factor(bedrooms), salePrice, fill = factor(bedrooms))) +
+  geom_violin(width = 1.4, show.legend = FALSE) +
+  geom_boxplot(width = 0.15,
+               alpha = 0.2,
+               color = "white",
+               show.legend = FALSE) +
   scale_y_log10(labels = escala_dinheiro) +
-  labs(x='N° de quartos', y='Valor de venda')
+  paletteer::scale_fill_paletteer_d("ggthemr::grape") +
+  labs(x='N° de quartos', y='Valor de venda') 
+
 ```
 
 ## Custo por região em SP
@@ -72,12 +78,12 @@ imoveis_por_regiao <- imoveis %>%
   arrange(desc(sale_price)) 
   
 imoveis_por_regiao %>% 
-  gt() %>% 
+  gt(process_md = TRUE) %>% 
   cols_label(
     regionName = "Localização",
     sale_price = "Preço do Imóvel",
     total_cost = "Custo Total de Aluguel",
-    yield = "Aluguel / Valor Imóvel",
+    yield = "Rendimento do Imóvel",
     n = "Quantidade"
   ) %>% 
   fmt_currency(
@@ -101,6 +107,8 @@ imoveis_por_regiao %>%
   gt_theme_espn() 
 ```
 
+## Preço médio por unidade de instalação no predio
+
 ```{r}
 library(tidytext)
 imoveis %>% 
@@ -118,16 +126,14 @@ imoveis %>%
   coord_flip() +
   labs(x='', y='')
 ```
-
+## Preço de venda do imóvel X Rendimento do Aluguel
 ```{r}
 imoveis %>% 
   ggplot(aes(yield, salePrice)) +
-  geom_hex(bins = 50,
-           show.legend = FALSE) +
-  scale_fill_fermenter(palette = "PuBu") +
+  geom_point(size = 2.2, alpha = 0.3, color = "#824D74") +
   scale_y_continuous(labels = escala_dinheiro) +
   scale_x_continuous(labels = scales::percent_format()) +
-  geom_smooth(method = "loess")
+  geom_smooth(method = "loess", color = "#401F71")
 ```
 
 
