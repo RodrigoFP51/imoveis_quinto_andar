@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# imoveis_quinto_andar
+# Análise Imóveis Quinto Andar
 
 ## Carregar pacotes e dados 
 ```{r, warning=FALSE}
@@ -21,18 +21,38 @@ library(gt)
 library(gtExtras)
 
 theme_set(
-  theme_light()
+  theme_light() +
+    theme(
+      panel.grid.minor = element_blank()
+    )
 )
 
-imoveis <- read_rds("dados/imoveis.rds")
+imoveis <- read_rds("dados/imoveis.rds") %>% 
+  mutate(price_m2 = salePrice / area) %>% 
+  relocate(price_m2, .after = id)
 
 ```
 
-## Função para formatar valores monetários
+## Funções Úteis
 
 ```{r}
 escala_dinheiro <- scales::dollar_format(scale = 1e-6,
                                          suffix = "M")
+
+comparar_grupos <- function(tbl, col, x_label = ""){
+  col_expr <- enquo(col)
+  
+  tbl %>% 
+    ggplot(aes(factor(!!col_expr), salePrice, fill = factor(!!col_expr))) +
+    geom_violin(width = 1.8, show.legend = FALSE) +
+    geom_boxplot(width = 0.15,
+                 alpha = 0.2,
+                 color = "white",
+                 show.legend = FALSE) +
+    scale_y_log10(labels = escala_dinheiro) +
+    paletteer::scale_fill_paletteer_d("rcartocolor::Antique") +
+    labs(x=x_label, y='Valor de venda')
+}
 ```
 
 ## Relação de área do imóvel com valor de venda  
@@ -44,50 +64,48 @@ imoveis %>%
   geom_point(color = "brown", alpha = 0.2) +
   scale_y_log10(labels = escala_dinheiro) +
   scale_x_log10() +
-  geom_smooth(method = "lm", color = "tomato", fill = "tomato", alpha = 0.2) 
+  geom_smooth(method = "lm", color = "tomato", fill = "tomato", alpha = 0.2) +
+  labs(x='Área', y='Preço do Imóvel')
 ```
 
-## Relação entre número de quartos e preço do imóvel  
+## Relação entre quantidade de quartos e preço do imóvel  
 
 ```{r}
 imoveis %>% 
-  ggplot(aes(factor(bedrooms), salePrice, fill = factor(bedrooms))) +
-  geom_violin(width = 1.4, show.legend = FALSE) +
-  geom_boxplot(width = 0.15,
-               alpha = 0.2,
-               color = "white",
-               show.legend = FALSE) +
-  scale_y_log10(labels = escala_dinheiro) +
-  paletteer::scale_fill_paletteer_d("ggthemr::grape") +
-  labs(x='N° de quartos', y='Valor de venda') 
-
+  comparar_grupos(bedrooms, x_label = "N° de Quartos")
 ```
+
+## Relação entre quantidade de banheiros e preço do imóvel  
+
+```{r}
+imoveis %>% 
+  comparar_grupos(bathrooms, x_label = "N° de Banheiros")
+```
+
 
 ## Custo por região em SP
 
 ```{r}
 imoveis_por_regiao <- imoveis %>% 
   summarize(
-    sale_price = median(salePrice),
-    total_cost = median(totalCost),
+    price_m2 = mean(price_m2),
     yield = mean(yield),
     n = n(),
     .by = regionName
   ) %>% 
   filter(n > 15) %>% 
-  arrange(desc(sale_price)) 
+  arrange(desc(price_m2)) 
   
 imoveis_por_regiao %>% 
   gt(process_md = TRUE) %>% 
   cols_label(
     regionName = "Localização",
-    sale_price = "Preço do Imóvel",
-    total_cost = "Custo Total de Aluguel",
-    yield = "Rendimento do Imóvel",
-    n = "Quantidade"
+    price_m2   = "Preço do M²",
+    yield      = "Rendimento do Imóvel",
+    n          = "Quantidade"
   ) %>% 
   fmt_currency(
-    columns = c(sale_price, total_cost),
+    columns = price_m2,
     decimals = 0,
     currency = "BRL"
   ) %>% 
@@ -96,12 +114,12 @@ imoveis_por_regiao %>%
     decimals = 2,
     drop_trailing_zeros = TRUE
   ) %>%
-  tab_spanner(
-    label = "Valores Medianos",
-    columns = c(sale_price, total_cost)
-  ) %>% 
+  # tab_spanner(
+  #   label = "Valores Medianos",
+  #   columns = c(sale_price, total_cost)
+  # ) %>% 
   tab_header(
-    title = "Valores de Apartamentos em diferentes regiões de SP"
+    title = "Valor do m² de Apartamentos em diferentes regiões de SP"
   ) %>% 
   tab_source_note("Fonte: quintoandar.com.br") %>% 
   gt_theme_espn() 
@@ -129,11 +147,12 @@ imoveis %>%
 ## Preço de venda do imóvel X Rendimento do Aluguel
 ```{r}
 imoveis %>% 
-  ggplot(aes(yield, salePrice)) +
+  ggplot(aes(yield, price_m2)) +
   geom_point(size = 2.2, alpha = 0.3, color = "#824D74") +
-  scale_y_continuous(labels = escala_dinheiro) +
+  scale_y_continuous(labels = scales::dollar_format()) +
   scale_x_continuous(labels = scales::percent_format()) +
-  geom_smooth(method = "loess", color = "#401F71")
+  geom_smooth(method = "loess", color = "#401F71") +
+  labs(x='Rentabilidade do imóvel', y='Preço m²')
 ```
 
 
