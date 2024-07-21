@@ -19,6 +19,7 @@ library(tidyverse, quietly = TRUE)
 library(tidytext)
 library(gt)
 library(gtExtras)
+library(EnvStats)
 
 theme_set(
   theme_light() +
@@ -36,8 +37,11 @@ imoveis <- read_rds("dados/imoveis.rds") %>%
 ## Funções Úteis
 
 ```{r}
-escala_dinheiro <- scales::dollar_format(scale = 1e-6,
-                                         suffix = "M")
+escala_dinheiro <- function(x){
+  ifelse(x >= 1e6,
+         paste0("R$", format(x / 1e6, big.mark = ",", scientific = FALSE, trim = TRUE), "M"),
+         paste0("R$", format(x / 1e3, big.mark = ",", scientific = FALSE, trim = TRUE), "K"))
+}
 
 comparar_grupos <- function(tbl, col, x_label = ""){
   col_expr <- enquo(col)
@@ -50,6 +54,7 @@ comparar_grupos <- function(tbl, col, x_label = ""){
                  color = "white",
                  show.legend = FALSE) +
     scale_y_log10(labels = escala_dinheiro) +
+    stat_n_text(alpha = 0.5) +
     paletteer::scale_fill_paletteer_d("rcartocolor::Antique") +
     labs(x=x_label, y='Valor de venda')
 }
@@ -63,8 +68,11 @@ imoveis %>%
   ggplot(aes(area, salePrice)) +
   geom_point(color = "brown", alpha = 0.2) +
   scale_y_log10(labels = escala_dinheiro) +
-  scale_x_log10() +
-  geom_smooth(method = "lm", color = "tomato", fill = "tomato", alpha = 0.2) +
+  scale_x_log10(labels = \(x) paste0(x, " m²")) +
+  geom_smooth(method = "lm",
+              color = "tomato",
+              fill = "tomato", 
+              alpha = 0.2) +
   labs(x='Área', y='Preço do Imóvel')
 ```
 
@@ -97,7 +105,7 @@ imoveis_por_regiao <- imoveis %>%
   arrange(desc(price_m2)) 
   
 imoveis_por_regiao %>% 
-  gt(process_md = TRUE) %>% 
+  gt() %>% 
   cols_label(
     regionName = "Localização",
     price_m2   = "Preço do M²",
@@ -122,10 +130,10 @@ imoveis_por_regiao %>%
     title = "Valor do m² de Apartamentos em diferentes regiões de SP"
   ) %>% 
   tab_source_note("Fonte: quintoandar.com.br") %>% 
-  gt_theme_espn() 
+  gt_theme_guardian()
 ```
 
-## Preço médio por unidade de instalação no predio
+## Preço médio por unidade de instalação no predio  
 
 ```{r}
 library(tidytext)
@@ -135,7 +143,8 @@ imoveis %>%
     sale_price = mean(salePrice),
     .by = palavra
   ) %>% 
-  mutate(palavra = fct_reorder(palavra, sale_price)) %>% 
+  mutate(palavra = str_to_sentence(str_replace_all(palavra, "_", " ")),
+         palavra = fct_reorder(palavra, sale_price)) %>% 
   ggplot(aes(palavra, sale_price)) + 
   geom_segment(aes(x=palavra, xend=palavra, y=0, yend=sale_price),
                lty = 2) +
@@ -144,16 +153,19 @@ imoveis %>%
   coord_flip() +
   labs(x='', y='')
 ```
-## Preço de venda do imóvel X Rendimento do Aluguel
+
+## Preço de venda do imóvel x Rendimento do Aluguel  
+
 ```{r}
 imoveis %>% 
   ggplot(aes(yield, price_m2)) +
   geom_point(size = 2.2, alpha = 0.3, color = "#824D74") +
-  scale_y_continuous(labels = scales::dollar_format()) +
+  scale_y_continuous(labels = escala_dinheiro) +
   scale_x_continuous(labels = scales::percent_format()) +
   geom_smooth(method = "loess", color = "#401F71") +
   labs(x='Rentabilidade do imóvel', y='Preço m²')
 ```
+
 
 
 

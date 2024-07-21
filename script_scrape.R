@@ -77,54 +77,5 @@ all_dfs <- all_dfs_raw %>%
 
 write_rds(all_dfs, "imoveis.rds")
 
-# Analysis  ---------------------------------------------------------------
-
-escala_dinheiro <- scales::dollar_format(scale = 1e-6,
-                                         suffix = "M")
-
-all_dfs %>% 
-  filter(salePrice < 15e6) %>% 
-  ggplot(aes(area, salePrice)) +
-  geom_point(color = "brown", alpha = 0.2) +
-  scale_y_log10(labels = escala_dinheiro) +
-  scale_x_log10() +
-  geom_smooth(method = "lm") +
-  ggpubr::stat_regline_equation()
-
-all_dfs %>% 
-  select(totalCost, salePrice,
-         rent, yield) %>% 
-  DataExplorer::plot_histogram(ncol = 2)
-
-all_dfs %>%  
-  ggplot(aes(factor(bedrooms), salePrice)) +
-  geom_boxplot() +
-  scale_y_log10(labels = scales::dollar_format())
-
-all_dfs %>% 
-  summarize(
-    price = mean(salePrice),
-    total_cost = mean(totalCost),
-    yield = mean(yield) * 100,
-    n = n(),
-    .by = regionName
-  ) %>% 
-  filter(n > 10) %>% 
-  arrange(desc(total_cost)) %>% 
-  head(20)
-
-
-all_dfs %>% 
-  mutate(
-    regionName = fct_lump(regionName, n = 20, other_level = "Outro"),
-    regionName = fct_reorder(regionName, salePrice),
-    regionName = fct_relevel(regionName, "Outro", after = -Inf)
-  ) %>% 
-  ggplot(aes(regionName, salePrice)) +
-  geom_boxplot() + 
-  scale_y_log10(labels = escala_dinheiro) +
-  coord_flip()
-
-
 
 
